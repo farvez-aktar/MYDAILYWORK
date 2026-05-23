@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FaceAI – Face Detection & Recognition</title>
+  <meta name="description" content="Real-time AI-powered face detection and recognition using deep learning." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<!-- ── Particle canvas ── -->
+<canvas id="particles-canvas"></canvas>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div class="logo">
+    <span class="logo-icon">◈</span>
+    <span class="logo-text">Face<span class="accent">AI</span></span>
+  </div>
+  <div class="header-badge">
+    <span class="pulse-dot"></span>
+    Deep Learning · ArcFace · OpenCV DNN
+  </div>
+</header>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <h1 class="hero-title">
+    AI-Powered <span class="gradient-text">Face Detection</span><br>
+    &amp; <span class="gradient-text">Recognition</span>
+  </h1>
+  <p class="hero-subtitle">
+    Real-time face detection with ResNet-SSD and ArcFace recognition.<br>
+    Upload an image, stream your webcam, or enroll new faces.
+  </p>
+  <div class="stats-bar">
+    <div class="stat"><span class="stat-val" id="stat-total">0</span><span class="stat-label">Enrolled</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat"><span class="stat-val" id="stat-fps">—</span><span class="stat-label">FPS</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat"><span class="stat-val" id="stat-faces">—</span><span class="stat-label">Faces</span></div>
+  </div>
+</section>
+
+<!-- ── Tabs ── -->
+<main class="main-content">
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="detect"  role="tab" id="tab-detect">🔍 Detect Image</button>
+    <button class="tab"        data-tab="webcam"  role="tab" id="tab-webcam">📷 Live Webcam</button>
+    <button class="tab"        data-tab="enroll"  role="tab" id="tab-enroll">➕ Enroll Face</button>
+    <button class="tab"        data-tab="database" role="tab" id="tab-database">🗄 Database</button>
+  </nav>
+
+  <!-- ── TAB: Detect ── -->
+  <section class="tab-panel active" id="panel-detect" role="tabpanel">
+    <div class="panel-grid">
+
+      <!-- Upload card -->
+      <div class="card upload-card">
+        <h2 class="card-title">Select Face Source</h2>
+        
+        <div class="source-toggle">
+          <button class="source-btn active" id="detect-source-upload" type="button">📁 Upload File</button>
+          <button class="source-btn" id="detect-source-camera" type="button">📷 Use Camera</button>
+        </div>
+
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="file-input" accept="image/*" hidden />
+          <div class="drop-icon">🖼</div>
+          <p class="drop-text">Drag &amp; drop an image here</p>
+          <p class="drop-sub">or <button class="link-btn" id="browse-btn" type="button">browse files</button></p>
+          <p class="drop-formats">PNG · JPG · WEBP · BMP</p>
+        </div>
+
+        <div class="camera-container" id="detect-camera-container" hidden>
+          <div class="camera-feed-wrap">
+            <video id="detect-video" autoplay playsinline></video>
+            <div class="camera-loading-placeholder" id="detect-camera-placeholder">
+              <div class="spinner"></div>
+              <p>Initializing camera...</p>
+            </div>
+          </div>
+          <button class="btn-primary" id="detect-capture-btn" type="button" style="margin-top: 0.5rem;">📸 Take Photo</button>
+        </div>
+        <div class="options-row">
+          <label class="toggle-label">
+            <input type="checkbox" id="recog-toggle" checked />
+            <span class="toggle-switch"></span>
+            Enable Recognition
+          </label>
+        </div>
+        <button class="btn-primary" id="detect-btn" disabled>Detect Faces</button>
+      </div>
+
+      <!-- Result card -->
+      <div class="card result-card">
+        <h2 class="card-title">Detection Result</h2>
+        <div class="result-img-wrap" id="result-wrap">
+          <div class="placeholder-msg">
+            <span class="placeholder-icon">◈</span>
+            <p>Result will appear here</p>
+          </div>
+        </div>
+        <div class="result-info" id="result-info" hidden>
+          <div class="result-summary" id="result-summary"></div>
+          <div class="faces-list"    id="faces-list"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── TAB: Webcam ── -->
+  <section class="tab-panel" id="panel-webcam" role="tabpanel">
+    <div class="webcam-layout">
+      <div class="card webcam-card">
+        <h2 class="card-title">Live Camera Feed</h2>
+        <div class="webcam-wrap" id="webcam-wrap">
+          <img id="webcam-stream" src="" alt="Webcam stream" hidden />
+          <div class="webcam-placeholder" id="webcam-placeholder">
+            <span>📷</span>
+            <p>Click "Start Camera" to begin</p>
+          </div>
+          <div class="webcam-overlay" id="webcam-overlay" hidden>
+            <span class="badge-fps" id="badge-fps">— FPS</span>
+            <span class="badge-faces" id="badge-faces">— Faces</span>
+          </div>
+        </div>
+        <div class="webcam-controls">
+          <button class="btn-primary" id="start-cam-btn">▶ Start Camera</button>
+          <button class="btn-secondary" id="stop-cam-btn" disabled>■ Stop</button>
+        </div>
+        <p class="webcam-note">⚠ Your webcam feed is processed locally – no data is sent to external servers.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TAB: Enroll ── -->
+  <section class="tab-panel" id="panel-enroll" role="tabpanel">
+    <div class="panel-grid">
+      <div class="card">
+        <h2 class="card-title">Enroll a New Face</h2>
+        <p class="card-desc">Add a person to the recognition database. Use a clear, front-facing photo.</p>
+
+        <div class="form-group">
+          <label for="enroll-name">Person's Name</label>
+          <input type="text" id="enroll-name" class="text-input" placeholder="e.g. Alice Johnson" />
+        </div>
+
+        <div class="source-toggle">
+          <button class="source-btn active" id="enroll-source-upload" type="button">📁 Upload File</button>
+          <button class="source-btn" id="enroll-source-camera" type="button">📷 Use Camera</button>
+        </div>
+
+        <div class="drop-zone small" id="enroll-drop">
+          <input type="file" id="enroll-file" accept="image/*" hidden />
+          <div class="drop-icon">👤</div>
+          <p class="drop-text">Drop face photo here</p>
+          <p class="drop-sub">or <button class="link-btn" id="enroll-browse" type="button">browse</button></p>
+        </div>
+
+        <div class="camera-container" id="enroll-camera-container" hidden>
+          <div class="camera-feed-wrap">
+            <video id="enroll-video" autoplay playsinline></video>
+            <div class="camera-loading-placeholder" id="enroll-camera-placeholder">
+              <div class="spinner"></div>
+              <p>Initializing camera...</p>
+            </div>
+          </div>
+          <button class="btn-primary" id="enroll-capture-btn" type="button" style="margin-top: 0.5rem;">📸 Take Photo</button>
+        </div>
+
+        <div id="enroll-preview-wrap" hidden>
+          <img id="enroll-preview" class="enroll-preview-img" src="" alt="Preview" />
+        </div>
+
+        <button class="btn-primary" id="enroll-btn">➕ Enroll Face</button>
+        <div class="enroll-status" id="enroll-status"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Tips for Best Results</h2>
+        <ul class="tips-list">
+          <li>✅ Use a well-lit, clear front-facing photo</li>
+          <li>✅ Single face per enrollment image</li>
+          <li>✅ Enroll 2–5 images per person for better accuracy</li>
+          <li>❌ Avoid sunglasses, heavy shadows, or extreme angles</li>
+          <li>❌ Avoid blurry or low-resolution images</li>
+        </ul>
+        <div class="info-box">
+          <strong>How it works</strong><br>
+          Your face is encoded into a 512-dimensional ArcFace embedding vector. Recognition compares cosine distance between embeddings – no raw images are used for matching.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TAB: Database ── -->
+  <section class="tab-panel" id="panel-database" role="tabpanel">
+    <div class="card">
+      <div class="db-header">
+        <h2 class="card-title">Known Faces Database</h2>
+        <button class="btn-secondary small" id="refresh-db-btn">↻ Refresh</button>
+      </div>
+      <div class="db-grid" id="db-grid">
+        <div class="db-empty" id="db-empty">
+          <span>🗄</span>
+          <p>No faces enrolled yet. Go to <strong>Enroll Face</strong> to add someone.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer class="footer">
+  <p>FaceAI · Built with OpenCV DNN · DeepFace ArcFace · Flask · Python</p>
+</footer>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>
