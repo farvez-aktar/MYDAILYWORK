@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic-Tac-Toe | AI Challenge</title>
+  <meta name="description" content="Play Tic-Tac-Toe against an unbeatable AI powered by Minimax with Alpha-Beta Pruning. Can you beat the machine?" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Animated background particles -->
+  <div class="bg-particles" id="bgParticles"></div>
+
+  <!-- Ambient glow orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="13" y1="2" x2="13" y2="38" stroke="url(#g1)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="27" y1="2" x2="27" y2="38" stroke="url(#g1)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="2" y1="13" x2="38" y2="13" stroke="url(#g1)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="2" y1="27" x2="38" y2="27" stroke="url(#g1)" stroke-width="2.5" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#a78bfa"/>
+                <stop offset="1" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <h1>Tic<span class="accent">·</span>Tac<span class="accent">·</span>Toe</h1>
+          <p class="tagline">AI Challenge</p>
+        </div>
+      </div>
+
+      <!-- Score Board -->
+      <div class="scoreboard">
+        <div class="score-card" id="scorePlayerCard">
+          <div class="score-symbol x-symbol">✕</div>
+          <div class="score-info">
+            <span class="score-label">YOU</span>
+            <span class="score-value" id="scorePlayer">0</span>
+          </div>
+        </div>
+        <div class="score-divider">
+          <span class="draws-label">DRAWS</span>
+          <span class="score-value draws-value" id="scoreDraws">0</span>
+        </div>
+        <div class="score-card" id="scoreAICard">
+          <div class="score-info" style="text-align:right">
+            <span class="score-label">AI</span>
+            <span class="score-value" id="scoreAI">0</span>
+          </div>
+          <div class="score-symbol o-symbol">○</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Game Controls -->
+    <div class="controls-bar">
+      <div class="mode-selector">
+        <span class="mode-label">Difficulty:</span>
+        <div class="mode-buttons">
+          <button class="mode-btn" id="btnEasy" onclick="setDifficulty('easy')">Easy</button>
+          <button class="mode-btn active" id="btnHard" onclick="setDifficulty('hard')">Unbeatable</button>
+        </div>
+      </div>
+      <div class="first-move-selector">
+        <span class="mode-label">Start:</span>
+        <div class="mode-buttons">
+          <button class="mode-btn active" id="btnYouFirst" onclick="setFirstMove('human')">You First</button>
+          <button class="mode-btn" id="btnAIFirst" onclick="setFirstMove('ai')">AI First</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Banner -->
+    <div class="status-banner" id="statusBanner">
+      <div class="status-icon" id="statusIcon">🎮</div>
+      <div class="status-text" id="statusText">Your move — place your <strong>X</strong></div>
+    </div>
+
+    <!-- Game Board -->
+    <div class="board-wrapper">
+      <div class="board" id="board">
+        <div class="cell" id="cell-0" onclick="handleCellClick(0)"></div>
+        <div class="cell" id="cell-1" onclick="handleCellClick(1)"></div>
+        <div class="cell" id="cell-2" onclick="handleCellClick(2)"></div>
+        <div class="cell" id="cell-3" onclick="handleCellClick(3)"></div>
+        <div class="cell" id="cell-4" onclick="handleCellClick(4)"></div>
+        <div class="cell" id="cell-5" onclick="handleCellClick(5)"></div>
+        <div class="cell" id="cell-6" onclick="handleCellClick(6)"></div>
+        <div class="cell" id="cell-7" onclick="handleCellClick(7)"></div>
+        <div class="cell" id="cell-8" onclick="handleCellClick(8)"></div>
+
+        <!-- Win line overlay -->
+        <canvas id="winCanvas" width="360" height="360"></canvas>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="btn-primary" id="btnNewGame" onclick="newGame()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+        New Game
+      </button>
+      <button class="btn-secondary" id="btnReset" onclick="resetScores()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6l-1 14H6L5 6"></path>
+          <path d="M10 11v6M14 11v6"></path>
+        </svg>
+        Reset Scores
+      </button>
+    </div>
+
+    <!-- Algorithm info panel -->
+    <div class="algo-panel">
+      <div class="algo-header" onclick="toggleAlgoPanel()">
+        <div class="algo-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          How the AI Works
+        </div>
+        <svg class="chevron" id="algoChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <div class="algo-content" id="algoContent">
+        <div class="algo-grid">
+          <div class="algo-card">
+            <div class="algo-card-icon">🧠</div>
+            <h3>Minimax Algorithm</h3>
+            <p>The AI explores all possible future game states, assigning scores to terminal states (Win: +10, Lose: -10, Draw: 0) and propagating the optimal values up the game tree.</p>
+          </div>
+          <div class="algo-card">
+            <div class="algo-card-icon">✂️</div>
+            <h3>Alpha-Beta Pruning</h3>
+            <p>An optimization that eliminates branches that cannot possibly influence the final decision — making the AI faster without sacrificing any accuracy or optimality.</p>
+          </div>
+          <div class="algo-card">
+            <div class="algo-card-icon">♟️</div>
+            <h3>Game Theory</h3>
+            <p>In Unbeatable mode, the AI plays a perfect game every time. The best outcome a human can achieve against a perfect AI is a draw — never a win.</p>
+          </div>
+          <div class="algo-card">
+            <div class="algo-card-icon">🎲</div>
+            <h3>Easy Mode</h3>
+            <p>The AI occasionally makes a random move instead of the optimal one, giving you a fighting chance to win and experience the game in a different way.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Built with <span class="heart">❤</span> using Minimax + Alpha-Beta Pruning &nbsp;·&nbsp; Game Theory in Action</p>
+    </footer>
+  </div>
+
+  <!-- Result Overlay -->
+  <div class="result-overlay" id="resultOverlay">
+    <div class="result-card" id="resultCard">
+      <div class="result-emoji" id="resultEmoji">🎉</div>
+      <h2 class="result-title" id="resultTitle">You Win!</h2>
+      <p class="result-subtitle" id="resultSubtitle">Congratulations! You outsmarted the AI.</p>
+      <div class="result-actions">
+        <button class="btn-primary" onclick="closeOverlayAndNewGame()">Play Again</button>
+        <button class="btn-secondary" onclick="closeOverlay()">View Board</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
