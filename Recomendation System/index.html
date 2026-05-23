@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CineMatch — AI Movie Recommendation System</title>
+  <meta name="description" content="CineMatch uses content-based filtering to recommend movies you'll love based on genres, themes, and tags. Discover your next favorite film instantly." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Particle Canvas Background -->
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+  <!-- ===================== HEADER ===================== -->
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">🎬</div>
+        <div>
+          <span class="logo-text">CineMatch</span>
+          <span class="logo-tagline">AI-Powered Recommendations</span>
+        </div>
+      </div>
+
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-number" id="stat-movies">30</span>
+          <span class="stat-label">Movies</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="stat-genres">12</span>
+          <span class="stat-label">Genres</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">∞</span>
+          <span class="stat-label">Discoveries</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span>✦</span> Content-Based Filtering
+    </div>
+    <h1>Find Your Next<br/>Favorite Film</h1>
+    <p>Click any movie to instantly discover similar titles powered by our Jaccard Similarity recommendation engine.</p>
+
+    <!-- Search Bar -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input
+        type="search"
+        id="search-input"
+        placeholder="Search by title, genre, or mood..."
+        autocomplete="off"
+        aria-label="Search movies"
+      />
+      <button id="clear-search" aria-label="Clear search">✕</button>
+    </div>
+  </section>
+
+  <!-- ===================== GENRE FILTERS ===================== -->
+  <div class="genre-filters-wrap">
+    <div id="genre-filters" role="group" aria-label="Filter by genre"></div>
+  </div>
+
+  <!-- ===================== MAIN ===================== -->
+  <main>
+
+    <!-- RECOMMENDATIONS PANEL (hidden until movie is selected) -->
+    <section id="recommendations-section" aria-live="polite">
+      <div class="rec-header">
+        <div class="rec-header-left">
+          <div>
+            <div class="rec-label">Because you liked</div>
+            <div id="rec-movie-title">—</div>
+          </div>
+        </div>
+        <button id="close-recommendations" aria-label="Close recommendations">✕</button>
+      </div>
+
+      <!-- Selected Movie Hero -->
+      <div class="selected-hero">
+        <div class="selected-hero-poster-wrap">
+          <img id="selected-hero-poster" src="" alt="Selected movie poster" />
+        </div>
+        <div class="selected-hero-info">
+          <h2 id="selected-hero-title"></h2>
+          <div id="selected-hero-year"></div>
+          <div id="selected-hero-rating"></div>
+          <div id="selected-hero-genres"></div>
+          <p id="selected-hero-desc"></p>
+        </div>
+      </div>
+
+      <!-- Recommended Movies -->
+      <div class="rec-body">
+        <div class="rec-body-title">🎯 Top Recommendations for You</div>
+        <div id="recommendations-grid"></div>
+      </div>
+    </section>
+
+    <!-- ALL MOVIES GRID -->
+    <div class="section-header">
+      <h2 class="section-title">All Movies</h2>
+      <span class="section-count" id="movie-count">30 titles</span>
+    </div>
+
+    <div id="movie-grid" role="list" aria-label="Movie catalog">
+      <!-- Cards rendered by JS -->
+    </div>
+
+    <!-- No Results State -->
+    <div id="no-results" role="status">
+      <div class="no-results-icon">🎭</div>
+      <h3>No movies found</h3>
+      <p>Try a different search term or genre filter.</p>
+    </div>
+
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer>
+    <p>Built with <span>♥</span> using Content-Based Filtering &nbsp;·&nbsp; <span>CineMatch</span> &nbsp;·&nbsp; Jaccard Similarity Algorithm</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
